@@ -8,3 +8,5 @@ langchain-text-splitters==0.0.1
 faiss-cpu
 pypdf2
 python-dotenv
+streamlit-lottie
+requests
