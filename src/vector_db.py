@@ -5,16 +5,15 @@ from config.settings import GOOGLE_API_KEY, EMBEDDING_MODEL, VECTOR_DB_PATH
 
 class VectorDB:
     """
-    Manages the FAISS vector database with Rate Limit handling.
+    Manages the FAISS vector database with Robust Error Handling.
     """
 
     @staticmethod
     def create_vector_store(text_chunks):
         """
-        Converts text chunks to embeddings in batches to avoid hitting Google's 429 Rate Limit.
+        Creates vector store with automatic retries for network failures.
         """
         try:
-            # 1. Initialize the embedding model
             embeddings = GoogleGenerativeAIEmbeddings(
                 model=EMBEDDING_MODEL, 
                 google_api_key=GOOGLE_API_KEY
@@ -22,55 +21,58 @@ class VectorDB:
             
             vector_store = None
             
-            # 2. Define Batch Size
-            # The Free Tier creates limits around 60 requests/minute.
-            # Processing 10 chunks at a time with a delay is safe.
-            batch_size = 10 
+            # REDUCED BATCH SIZE: Smaller packets are less likely to timeout
+            batch_size = 5 
             total_chunks = len(text_chunks)
             
-            print(f"🔄 Processing {total_chunks} chunks in batches of {batch_size}...")
+            print(f"🔄 Processing {total_chunks} chunks...")
 
-            # 3. Process in batches
             for i in range(0, total_chunks, batch_size):
-                # Slice the list to get a sub-list (e.g., chunks 0-9, then 10-19)
                 batch = text_chunks[i : i + batch_size]
                 
-                if vector_store is None:
-                    # First batch creates the store
-                    vector_store = FAISS.from_texts(batch, embedding=embeddings)
-                else:
-                    # Subsequent batches allow us to add to the existing store
-                    vector_store.add_texts(batch)
-                
-                # Progress indicator for the logs
-                print(f"   ✅ Processed batch {i} to {i + len(batch)}")
-                
-                # 4. CRITICAL: Sleep to respect Rate Limits
-                # Waiting 1 second between batches prevents the 429 error
-                time.sleep(2) 
-            
-            # 5. Save the final result
+                # --- RETRY LOGIC START ---
+                success = False
+                attempts = 0
+                while not success and attempts < 3:
+                    try:
+                        if vector_store is None:
+                            vector_store = FAISS.from_texts(batch, embedding=embeddings)
+                        else:
+                            vector_store.add_texts(batch)
+                        success = True # It worked! Exit the retry loop
+                        
+                    except Exception as e:
+                        attempts += 1
+                        print(f"⚠️ Network error on batch {i} (Attempt {attempts}/3): {e}")
+                        if attempts < 3:
+                            wait_time = attempts * 5 # Wait 5s, then 10s...
+                            print(f"   ⏳ Waiting {wait_time}s before retrying...")
+                            time.sleep(wait_time)
+                        else:
+                            # If it fails 3 times, we have to stop
+                            raise RuntimeError(f"❌ Failed to process batch after 3 attempts. Check internet connection.")
+                # --- RETRY LOGIC END ---
+
+                print(f"   ✅ Batch {i}-{i+len(batch)} done.")
+                time.sleep(1) # Short nap to be nice to the API
+
             if vector_store:
                 vector_store.save_local(VECTOR_DB_PATH)
                 return vector_store
             else:
-                raise ValueError("No vector store created (empty text?).")
+                raise ValueError("No text to process.")
             
         except Exception as e:
-            print(f"❌ Error creating vector store: {e}")
+            print(f"❌ Final Error: {e}")
             raise e
 
     @staticmethod
     def load_vector_store():
-        """
-        Loads the saved vector store from the hard drive.
-        """
         try:
             embeddings = GoogleGenerativeAIEmbeddings(
                 model=EMBEDDING_MODEL, 
                 google_api_key=GOOGLE_API_KEY
             )
-            
             return FAISS.load_local(
                 VECTOR_DB_PATH, 
                 embeddings, 
