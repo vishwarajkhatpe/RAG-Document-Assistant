@@ -4,14 +4,11 @@ from streamlit_lottie import st_lottie
 
 class UIUtils:
     """
-    Helper class to manage UI styling and animations.
+    Helper class to manage UI styling and animations (Light Mode Optimized).
     """
 
     @staticmethod
     def load_lottie_url(url: str):
-        """
-        Fetches a Lottie animation JSON from a URL.
-        """
         try:
             r = requests.get(url)
             if r.status_code != 200:
@@ -22,67 +19,103 @@ class UIUtils:
 
     @staticmethod
     def get_custom_css():
-        """
-        Returns custom CSS to make the app look modern and colorful.
-        """
         return """
         <style>
-            /* Main Background Gradient */
+            /* --- GLOBAL LIGHT MODE SETTINGS --- */
+            
+            /* Main Background - Clean White/Light Gray */
             .stApp {
-                background: linear-gradient(to right bottom, #f0f2f6, #e2e8f0);
+                background-color: #ffffff;
             }
             
-            /* Sidebar Styling */
+            /* Sidebar Background - Soft Gray for contrast */
             [data-testid="stSidebar"] {
-                background-color: #1e293b;
-                color: white;
+                background-color: #f8f9fa;
+                border-right: 1px solid #e9ecef;
             }
             
-            /* Custom Title Style */
+            /* Typography - Dark Gray for readability on light bg */
+            h1, h2, h3, p, div, span {
+                color: #212529 !important;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            
+            /* Main Heading */
             h1 {
-                color: #2563eb;
-                font-family: 'Helvetica', sans-serif;
+                color: #2563eb !important; /* Professional Blue */
+                font-weight: 700;
                 text-align: center;
-                text-shadow: 2px 2px 4px #00000020;
+                padding-bottom: 20px;
             }
             
-            /* Chat Message Box Styling */
+            /* --- INPUT FIELDS --- */
+            
+            /* Text Input Boxes */
             .stTextInput > div > div > input {
-                border-radius: 20px;
-                border: 2px solid #2563eb;
+                background-color: #ffffff;
+                color: #212529;
+                border: 1px solid #ced4da;
+                border-radius: 8px;
                 padding: 10px;
             }
             
-            /* Button Styling */
+            .stTextInput > div > div > input:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+            }
+
+            /* --- BUTTONS --- */
+            
+            /* Primary Button Styling */
             .stButton > button {
-                background-color: #2563eb;
-                color: white;
-                border-radius: 20px;
-                padding: 10px 24px;
+                background-color: #2563eb; /* Blue */
+                color: white !important;
+                border-radius: 8px;
                 border: none;
-                transition: all 0.3s ease;
+                padding: 0.5rem 1rem;
+                font-weight: 600;
+                transition: all 0.2s ease;
+                width: 100%;
             }
             
             .stButton > button:hover {
                 background-color: #1d4ed8;
-                transform: scale(1.05);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             }
             
-            /* Result Box Styling */
+            /* --- CHAT BUBBLES --- */
+            
+            /* User Message */
+            [data-testid="stChatMessage"] {
+                background-color: #f3f4f6;
+                border-radius: 12px;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            /* Assistant Message Avatar container */
+            [data-testid="stChatMessage"] [data-testid="stChatMessageAvatarBackground"] {
+                background-color: #2563eb;
+            }
+
+            /* --- STATUS BOXES --- */
+            
             .success-box {
-                padding: 20px;
-                border-radius: 10px;
-                background-color: #dcfce7;
-                border-left: 5px solid #22c55e;
-                color: #14532d;
+                padding: 15px;
+                border-radius: 8px;
+                background-color: #d1fae5; /* Light Green */
+                color: #065f46 !important;
+                border: 1px solid #a7f3d0;
+                margin-bottom: 15px;
             }
             
             .error-box {
-                padding: 20px;
-                border-radius: 10px;
-                background-color: #fee2e2;
-                border-left: 5px solid #ef4444;
-                color: #7f1d1d;
+                padding: 15px;
+                border-radius: 8px;
+                background-color: #fee2e2; /* Light Red */
+                color: #991b1b !important;
+                border: 1px solid #fecaca;
+                margin-bottom: 15px;
             }
         </style>
         """
