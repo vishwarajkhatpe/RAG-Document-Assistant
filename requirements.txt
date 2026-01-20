@@ -10,3 +10,4 @@ pypdf2
 python-dotenv
 streamlit-lottie
 requests
+sentence-transformers  # <--- NEW: Runs embeddings locally
