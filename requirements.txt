@@ -3,6 +3,7 @@ google-generativeai
 langchain
 langchain-google-genai
 langchain-community
+langchain-text-splitters
 faiss-cpu
 pypdf2
 python-dotenv
