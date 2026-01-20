@@ -14,7 +14,6 @@ st.set_page_config(
 )
 
 # --- Load Assets ---
-# Using a cleaner, more professional "Document Analysis" animation
 LOTTIE_URL = "https://assets9.lottiefiles.com/packages/lf20_w51pcehl.json"
 lottie_anim = UIUtils.load_lottie_url(LOTTIE_URL)
 
@@ -27,10 +26,8 @@ if "messages" not in st.session_state:
 
 # --- Sidebar ---
 with st.sidebar:
-    # 1. Project Title (Updated as requested)
     st.markdown("## 🧠 Project Workspace")
     
-    # 2. Animation
     if lottie_anim:
         st_lottie(lottie_anim, height=180, key="sidebar_anim")
     
@@ -57,7 +54,6 @@ with st.sidebar:
                     st.sidebar.error(f"Error: {e}")
 
     st.markdown("---")
-    # Clear Chat is now a secondary action (visually distinct)
     if st.button("🗑️ Reset Conversation"):
         st.session_state.messages = []
         st.rerun()
@@ -90,7 +86,8 @@ if prompt := st.chat_input("Ask a question about your documents..."):
                 docs = new_db.similarity_search(prompt)
                 chain = RAGChain.get_conversational_chain()
                 
-                response = chain(
+                # --- FIXED: Use 'invoke' instead of calling directly ---
+                response = chain.invoke(
                     {"input_documents": docs, "question": prompt}, 
                     return_only_outputs=True
                 )
