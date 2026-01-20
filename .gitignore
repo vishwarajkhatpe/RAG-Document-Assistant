@@ -1,5 +1,11 @@
-venv/
+# Python
 __pycache__/
+*.py[cod]
+venv/
+.pytest_cache/
+
+# Environment variables
 .env
-*.pdf
+
+# Vector DB storage (local)
 faiss_index/
