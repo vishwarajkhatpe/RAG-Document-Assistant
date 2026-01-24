@@ -48,27 +48,22 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if selected == "Workspace":
-        st.markdown("### 📂 Upload Document")
-        pdf_docs = st.file_uploader("Choose PDF", accept_multiple_files=True, type=['pdf'], label_visibility="collapsed")
-        
-        if st.button("Process Document", use_container_width=True):
+    if st.button("Process Document", use_container_width=True):
             if not pdf_docs:
                 st.toast("⚠️ No file selected.")
             else:
                 try:
-                    # --- FEATURE 1: GRANULAR PROGRESS TRACKING ---
                     with st.status("Initializing System...", expanded=True) as status:
                         
-                        status.write("📂 Reading PDF file...")
-                        raw_text = PDFHandler.get_pdf_text(pdf_docs)
+                        # CHANGE 1: We now call the single 'get_chunked_documents' function
+                        status.write("📂 Reading & Chunking PDF (Page by Page)...")
+                        chunked_documents = PDFHandler.get_chunked_documents(pdf_docs)
                         
-                        status.write("✂️ Splitting text into chunks...")
-                        text_chunks = PDFHandler.get_text_chunks(raw_text)
+                        status.write(f"✂️ Generated {len(chunked_documents)} chunks with metadata...")
                         
                         status.write("🧠 Generating Vector Embeddings...")
-                        # This call uses the Cached Model (Feature 2)
-                        st.session_state.vector_store = VectorDB.create_vector_store(text_chunks)
+                        # CHANGE 2: Pass the document objects, not raw text
+                        st.session_state.vector_store = VectorDB.create_vector_store(chunked_documents)
                         
                         status.update(label="System Ready!", state="complete", expanded=False)
                         
