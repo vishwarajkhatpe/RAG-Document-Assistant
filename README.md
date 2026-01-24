@@ -1,6 +1,6 @@
 # 🤖 RAG Document Assistant (v1.0)
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)]([https://vishwaraj-rag-assistant-v1.streamlit.app](https://rag-document-assistant-v1.streamlit.app/))
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://rag-document-assistant-v1.streamlit.app/)
 [![Release](https://img.shields.io/badge/Release-v1.0-orange?style=for-the-badge&logo=github)](https://github.com/vishwarajkhatpe/RAG-Document-Assistant/releases/tag/v1.0)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
