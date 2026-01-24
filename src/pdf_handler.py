@@ -1,17 +1,11 @@
-from PyPDF2 import PdfReader
-# UPDATED IMPORT: We now import from 'langchain_text_splitters' instead of 'langchain.text_splitter'
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from config.settings import CHUNK_SIZE, CHUNK_OVERLAP
+from pypdf import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 class PDFHandler:
-    """
-    Handles processing of PDF files: extracting text and chunking it.
-    """
-
     @staticmethod
     def get_pdf_text(pdf_docs):
         """
-        Reads a list of PDF files and extracts all text from them.
+        Loops through uploaded PDF files and extracts raw text.
         """
         text = ""
         for pdf in pdf_docs:
@@ -23,12 +17,12 @@ class PDFHandler:
     @staticmethod
     def get_text_chunks(text):
         """
-        Splits the raw text into smaller, manageable chunks.
+        Splits the raw text into manageable chunks for vectorization.
+        We use a chunk_size of 1000 with 200 overlap to maintain context.
         """
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=CHUNK_SIZE,
-            chunk_overlap=CHUNK_OVERLAP,
-            length_function=len
+            chunk_size=1000,
+            chunk_overlap=200
         )
         chunks = text_splitter.split_text(text)
         return chunks
