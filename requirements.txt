@@ -12,3 +12,4 @@ streamlit-lottie
 requests
 sentence-transformers  # <--- NEW: Runs embeddings locally
 streamlit-option-menu  # <--- NEW: For the beautiful sidebar
+pypdf  # <--- NEW: PDF handling
