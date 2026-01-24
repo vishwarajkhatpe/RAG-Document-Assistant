@@ -55,6 +55,17 @@ RAG-Document-Assistant/
 ```
 
 ---
+## 📸 Application Interface
+
+<p align="center">
+  <img src="screenshots/home.png" alt="Home Screen" width="100%" style="border-radius: 10px; margin-bottom: 20px;">
+</p>
+
+| **Processing Engine** | **Verified Citations** |
+|:---:|:---:|
+| <img src="screenshots/workspace.png" alt="Processing" width="100%"> | <img src="screenshots/chat.png" alt="Chat" width="100%"> |
+
+---
 
 ## ⚙️ Deployment Guide
 
@@ -132,4 +143,4 @@ The application features a clean, two-panel layout:
 
 ## ✍️ Author
 
-**Vishwaraj Khatpe** *Final Year Engineering Student (AIML)* [GitHub Profile](https://github.com/your-username)
+**Vishwaraj Khatpe** *Final Year Engineering Student (AIML)* [GitHub Profile](https://github.com/vishwarajkhatpe)
