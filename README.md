@@ -1,6 +1,6 @@
 # 🤖 RAG Document Assistant (v1.0)
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/vishwarajkhatpe/RAG-Document-Assistant?style=for-the-badge&color=orange)
+[![Release](https://img.shields.io/badge/Release-v1.0-orange?style=for-the-badge&logo=github)](https://github.com/vishwarajkhatpe/RAG-Document-Assistant/releases/tag/v1.0)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=chainlink&logoColor=white)
