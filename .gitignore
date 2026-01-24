@@ -1,11 +1,19 @@
-# Python
+# General Python
 __pycache__/
 *.py[cod]
-venv/
-.pytest_cache/
+*$py.class
 
-# Environment variables
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Environment Variables
 .env
 
-# Vector DB storage (local)
+# Logs
+*.log
+
+# HIDDEN FOLDERS
+tests/
 faiss_index/
