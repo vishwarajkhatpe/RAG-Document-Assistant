@@ -1,5 +1,6 @@
 import streamlit as st
 import gc
+import time  # <--- NEW IMPORT
 from streamlit_option_menu import option_menu
 from langchain.chains import RetrievalQA
 from src.pdf_handler import PDFHandler
@@ -8,6 +9,13 @@ from src.rag_chain import RAGChain
 from src.ui_utils import UIUtils
 from dotenv import load_dotenv
 import os
+
+# --- TYPEWRITER EFFECT ENGINE ---
+def stream_parser(text: str):
+    """Simulates typing effect for the AI response"""
+    for word in text.split(" "):
+        yield word + " "
+        time.sleep(0.02)  # Adjust speed here (lower = faster)
 
 # --- STYLE OVERRIDE (Royal Indigo Theme) ---
 def get_override_style():
@@ -22,23 +30,29 @@ def get_override_style():
         .stButton > button {
             background: linear-gradient(to right, #4f46e5, #7c3aed) !important;
             border: none;
+            transition: all 0.3s ease;
         }
         .stButton > button:hover {
+            transform: scale(1.02);
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
         }
 
         /* Override Citation Borders */
         .source-container {
             border-left: 3px solid #4f46e5 !important;
-        }
-        .source-header {
-            color: #4f46e5 !important;
+            animation: fadeIn 0.5s ease-in;
         }
         
-        /* Override User Chat Bubble (Light Indigo) */
+        /* Animations */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
         .user-bubble {
             background-color: #e0e7ff !important;
             color: #3730a3 !important;
+            animation: fadeIn 0.3s ease-in;
         }
         
         /* Override Workspace Header Underline */
@@ -58,9 +72,7 @@ st.markdown(UIUtils.get_clean_style(), unsafe_allow_html=True)
 st.markdown(get_override_style(), unsafe_allow_html=True)
 
 # --- CLOUD COMPATIBILITY BRIDGE ---
-# This allows the app to find the key on Streamlit Cloud
 load_dotenv()
-
 if "GOOGLE_API_KEY" in st.secrets:
     os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 
@@ -92,7 +104,6 @@ with st.sidebar:
             "container": {"padding": "0!important", "background-color": "transparent"},
             "icon": {"color": "#64748b", "font-size": "18px"}, 
             "nav-link": {"font-size": "15px", "text-align": "left", "margin":"5px", "color": "#334155"},
-            # Selected color to Indigo/Blue
             "nav-link-selected": {
                 "background-color": "#e0e7ff", 
                 "color": "#4f46e5",
@@ -147,10 +158,10 @@ with st.sidebar:
             st.session_state.messages = []
             st.rerun()
 
-    # FOOTER WITH SIGNATURE
+    # FOOTER
     st.markdown(f"""
         <div class="sidebar-footer" style="position: fixed; bottom: 0; padding: 20px; color: #64748b; font-size: 0.8rem;">
-            <span>v1.0  Developed by <b>Vishwaraj Khatpe</b></span>
+            <span>v1.0<br>Developed by <b>Vishwaraj Khatpe</b></span>
         </div>
     """, unsafe_allow_html=True)
 
@@ -170,7 +181,6 @@ if selected == "Home":
     
 # --- PAGE 2: WORKSPACE ---
 elif selected == "Workspace":
-    # Header with new Blue underline color (handled by CSS override)
     st.markdown("""
         <div style="font-size: 2.2rem; font-weight: 700; color: #1e293b; margin-bottom: 25px; 
         padding-bottom: 10px; border-bottom: 3px solid #00b09b; display: inline-block;">
@@ -182,6 +192,7 @@ elif selected == "Workspace":
     chat_container = st.container()
     with chat_container:
         for message in st.session_state.messages:
+            # We don't stream history, just render it instantly
             st.markdown(UIUtils.render_message(message["role"], message["content"]), unsafe_allow_html=True)
             
             if "sources" in message:
@@ -191,13 +202,16 @@ elif selected == "Workspace":
 
     # 2. Handle Input
     if prompt := st.chat_input("Query the knowledge base..."):
+        # Add User Message to State
         st.session_state.messages.append({"role": "user", "content": prompt})
+        # Render User Message Immediately
         st.markdown(UIUtils.render_message("user", prompt), unsafe_allow_html=True)
 
         if not st.session_state.vector_store:
             st.warning("⚠️ Knowledge Base Empty. Please upload and process a document first.")
         else:
-            with st.spinner("Analyzing documents..."):
+            # Interactive "Thinking" Spinner
+            with st.spinner("🧠 Analyzing context vectors..."):
                 try:
                     # Initialize Chain
                     model, prompt_template = RAGChain.get_conversational_chain()
@@ -223,16 +237,20 @@ elif selected == "Workspace":
                         text = doc.page_content[:150].replace("\n", " ") + "..."
                         formatted_sources.append({"page": f"{page} ({source_file})", "text": text})
                     
-                    # State Update
+                    # --- INTERACTIVE RESPONSE ---
+                    # 1. Save to history FIRST
                     st.session_state.messages.append({
                         "role": "assistant", 
                         "content": answer,
                         "sources": formatted_sources
                     })
                     
-                    # Render
-                    st.markdown(UIUtils.render_message("assistant", answer), unsafe_allow_html=True)
+                    # 2. Stream the output with Typewriter Effect
+                    # We create a placeholder for the "Assistant" message
+                    with st.chat_message("assistant", avatar="🤖"):
+                        st.write_stream(stream_parser(answer))
                     
+                    # 3. Show Citations AFTER streaming finishes
                     with st.expander("🔍 View Verified Citations", expanded=True):
                         for src in formatted_sources:
                             st.markdown(UIUtils.render_source(src['page'], src['text']), unsafe_allow_html=True)
