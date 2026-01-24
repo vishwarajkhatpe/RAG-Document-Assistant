@@ -1,28 +1,39 @@
 from pypdf import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.docstore.document import Document
 
 class PDFHandler:
     @staticmethod
-    def get_pdf_text(pdf_docs):
+    def get_chunked_documents(pdf_docs):
         """
-        Loops through uploaded PDF files and extracts raw text.
+        Processes PDFs page-by-page to preserve page numbers.
+        Returns a list of Document objects with metadata.
         """
-        text = ""
-        for pdf in pdf_docs:
-            pdf_reader = PdfReader(pdf)
-            for page in pdf_reader.pages:
-                text += page.extract_text()
-        return text
-
-    @staticmethod
-    def get_text_chunks(text):
-        """
-        Splits the raw text into manageable chunks for vectorization.
-        We use a chunk_size of 1000 with 200 overlap to maintain context.
-        """
+        all_chunks = []
+        
+        # 1. Define the Splitter
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200
         )
-        chunks = text_splitter.split_text(text)
-        return chunks
+
+        # 2. Loop through every uploaded file
+        for pdf in pdf_docs:
+            pdf_reader = PdfReader(pdf)
+            
+            # 3. Loop through every page in the file
+            for i, page in enumerate(pdf_reader.pages):
+                text = page.extract_text()
+                if text:
+                    # Create a "Document" object for this page
+                    # We store the page number (i+1) in the metadata
+                    page_doc = Document(
+                        page_content=text, 
+                        metadata={"page": i + 1}
+                    )
+                    
+                    # Split this specific page into chunks
+                    page_chunks = text_splitter.split_documents([page_doc])
+                    all_chunks.extend(page_chunks)
+                    
+        return all_chunks
