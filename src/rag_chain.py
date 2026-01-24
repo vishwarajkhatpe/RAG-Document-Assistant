@@ -1,61 +1,43 @@
+import os
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from config.settings import GOOGLE_API_KEY, LLM_MODEL, TEMPERATURE
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from dotenv import load_dotenv
 
-# Safety import block
-try:
-    from langchain.chains.question_answering import load_qa_chain
-except ImportError:
-    from langchain.chains import load_qa_chain
+load_dotenv()
 
 class RAGChain:
-    """
-    Manages the RAG Chain with improved social intelligence and professional tone.
-    """
-
     @staticmethod
     def get_conversational_chain():
         """
-        Creates the LLM chain with a smart prompt that handles greetings 
-        and missing information gracefully.
+        Initializes the RAG chain with a specific prompt template.
+        Returns the chain object that can be invoked with a query.
         """
-        
-        # --- THE FIX IS HERE ---
-        # We give the AI a "Persona" and specific rules for different scenarios.
+        # 1. Define the Prompt Template
         prompt_template = """
-        You are an intelligent and professional document assistant. Your goal is to help the user understand their PDF files.
-
-        Instructions:
-        1. GREETINGS: If the user greets you (e.g., "Hi", "Hello", "Good morning"), politely greet them back and ask what they would like to know about their documents. Do not look for context for greetings.
-        2. CONTEXTUAL QUESTIONS: Answer the question ONLY using the facts from the provided context below.
-        3. TONE: Maintain a helpful, clear, and professional tone. Use bullet points if the answer is long.
-        4. MISSING INFO: If the answer is NOT in the context, do not make it up. Simply say: "I analyzed the documents, but I couldn't find information regarding that specific topic."
+        Answer the question as detailed as possible from the provided context. 
+        If the answer is not in the provided context, just say, "answer is not available in the context", 
+        don't provide the wrong answer.
 
         Context:
         {context}
 
-        User Question: 
+        Question: 
         {question}
 
         Answer:
         """
 
-        try:
-            model = ChatGoogleGenerativeAI(
-                model=LLM_MODEL,
-                temperature=TEMPERATURE,
-                google_api_key=GOOGLE_API_KEY
-            )
+        prompt = PromptTemplate(
+            template=prompt_template, 
+            input_variables=["context", "question"]
+        )
 
-            prompt = PromptTemplate(
-                template=prompt_template, 
-                input_variables=["context", "question"]
-            )
+        # 2. Initialize Gemini Pro (The Brain)
+        # temperature=0.3 means "be creative but stick to facts"
+        model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.3)
 
-            # We use chain_type="stuff" which simply inserts the context into the prompt above
-            chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
-            return chain
-            
-        except Exception as e:
-            print(f"Error initializing RAG chain: {e}")
-            raise e
+        # 3. Return the configuration
+        # This is just the LLM + Prompt configuration. 
+        # The actual 'chain' is built dynamically in app.py when we have the vector_store.
+        return model, prompt
