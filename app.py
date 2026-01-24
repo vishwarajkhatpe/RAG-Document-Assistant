@@ -2,7 +2,7 @@ import streamlit as st
 import time
 from datetime import datetime
 from streamlit_option_menu import option_menu
-from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain.chains import RetrievalQA
 from src.pdf_handler import PDFHandler
 from src.vector_db import VectorDB
 from src.rag_chain import RAGChain
@@ -48,21 +48,29 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if st.button("Process Document", use_container_width=True):
+    # --- WORKSPACE LOGIC (Where pdf_docs is defined) ---
+    if selected == "Workspace":
+        st.markdown("### 📂 Upload Document")
+        
+        # 1. DEFINE THE VARIABLE HERE
+        pdf_docs = st.file_uploader("Choose PDF", accept_multiple_files=True, type=['pdf'], label_visibility="collapsed")
+        
+        # 2. USE IT HERE (Must be indented inside the same block)
+        if st.button("Process Document", use_container_width=True):
             if not pdf_docs:
                 st.toast("⚠️ No file selected.")
             else:
                 try:
                     with st.status("Initializing System...", expanded=True) as status:
                         
-                        # CHANGE 1: We now call the single 'get_chunked_documents' function
                         status.write("📂 Reading & Chunking PDF (Page by Page)...")
+                        # This calls the new function we created
                         chunked_documents = PDFHandler.get_chunked_documents(pdf_docs)
                         
                         status.write(f"✂️ Generated {len(chunked_documents)} chunks with metadata...")
                         
                         status.write("🧠 Generating Vector Embeddings...")
-                        # CHANGE 2: Pass the document objects, not raw text
+                        # This passes the documents to the vector DB
                         st.session_state.vector_store = VectorDB.create_vector_store(chunked_documents)
                         
                         status.update(label="System Ready!", state="complete", expanded=False)
@@ -112,7 +120,6 @@ elif selected == "Workspace":
         for message in st.session_state.messages:
             st.markdown(UIUtils.render_message(message["role"], message["content"]), unsafe_allow_html=True)
             
-            # --- FEATURE 3: RENDER HISTORICAL CITATIONS ---
             if "sources" in message:
                 with st.expander("📚 View Verified Sources"):
                     for source in message["sources"]:
@@ -131,8 +138,6 @@ elif selected == "Workspace":
                     # Initialize Chain
                     model, prompt_template = RAGChain.get_conversational_chain()
                     
-                    # Create Retrieval Chain dynamically
-                    # We enable 'return_source_documents' for Feature 3
                     qa_chain = RetrievalQA.from_chain_type(
                         llm=model,
                         chain_type="stuff",
@@ -150,7 +155,7 @@ elif selected == "Workspace":
                     formatted_sources = []
                     for doc in source_docs:
                         # Extract Page Number (default to 1 if missing)
-                        page = doc.metadata.get("page", 0) + 1
+                        page = doc.metadata.get("page", 0)
                         # Extract Text Snippet (First 100 chars)
                         text = doc.page_content[:100].replace("\n", " ")
                         formatted_sources.append({"page": page, "text": text})
