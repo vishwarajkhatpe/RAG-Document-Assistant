@@ -145,7 +145,7 @@ with st.sidebar:
     # UPDATED FOOTER WITH SIGNATURE
     st.markdown(f"""
         <div class="sidebar-footer" style="position: fixed; bottom: 0; padding: 20px; color: #64748b; font-size: 0.8rem;">
-            <span>v1.0<br>Developed by <b>Vishwaraj Khatpe</b></span>
+            <span>v1.0 <b></b> Developed by <b>Vishwaraj Khatpe</b></span>
         </div>
     """, unsafe_allow_html=True)
 
