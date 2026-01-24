@@ -9,7 +9,7 @@ from src.ui_utils import UIUtils
 from dotenv import load_dotenv
 import os
 
-# --- STYLE OVERRIDE (Changes Color without touching ui_utils.py) ---
+# --- STYLE OVERRIDE (Royal Indigo Theme) ---
 def get_override_style():
     return """
     <style>
@@ -57,11 +57,16 @@ st.markdown(UIUtils.get_clean_style(), unsafe_allow_html=True)
 # 2. Inject the new Colors (Theme)
 st.markdown(get_override_style(), unsafe_allow_html=True)
 
+# --- CLOUD COMPATIBILITY BRIDGE ---
+# This allows the app to find the key on Streamlit Cloud
 load_dotenv()
+
+if "GOOGLE_API_KEY" in st.secrets:
+    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 
 # --- VALIDATION ---
 if not os.getenv("GOOGLE_API_KEY"):
-    st.error("🚨 Critical Error: GOOGLE_API_KEY not found. Please configure your .env file.")
+    st.error("🚨 Critical Error: GOOGLE_API_KEY not found. Please configure .env or Streamlit Secrets.")
     st.stop()
 
 # --- STATE ---
@@ -87,7 +92,7 @@ with st.sidebar:
             "container": {"padding": "0!important", "background-color": "transparent"},
             "icon": {"color": "#64748b", "font-size": "18px"}, 
             "nav-link": {"font-size": "15px", "text-align": "left", "margin":"5px", "color": "#334155"},
-            # CHANGED: Selected color to Indigo/Blue
+            # Selected color to Indigo/Blue
             "nav-link-selected": {
                 "background-color": "#e0e7ff", 
                 "color": "#4f46e5",
@@ -142,10 +147,10 @@ with st.sidebar:
             st.session_state.messages = []
             st.rerun()
 
-    # UPDATED FOOTER WITH SIGNATURE
+    # FOOTER WITH SIGNATURE
     st.markdown(f"""
         <div class="sidebar-footer" style="position: fixed; bottom: 0; padding: 20px; color: #64748b; font-size: 0.8rem;">
-            <span>v1.0 <b></b> Developed by <b>Vishwaraj Khatpe</b></span>
+            <span>v1.0<br>Developed by <b>Vishwaraj Khatpe</b></span>
         </div>
     """, unsafe_allow_html=True)
 
