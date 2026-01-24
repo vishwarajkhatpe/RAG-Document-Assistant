@@ -10,10 +10,8 @@ class RAGChain:
     @staticmethod
     def get_conversational_chain():
         """
-        Initializes the RAG chain with a specific prompt template.
-        Returns the chain object that can be invoked with a query.
+        Initializes the RAG chain using the user-confirmed 'gemini-2.5-flash' model.
         """
-        # 1. Define the Prompt Template
         prompt_template = """
         Answer the question as detailed as possible from the provided context. 
         If the answer is not in the provided context, just say, "answer is not available in the context", 
@@ -33,11 +31,13 @@ class RAGChain:
             input_variables=["context", "question"]
         )
 
-        # 2. Initialize Gemini Pro (The Brain)
-        # temperature=0.3 means "be creative but stick to facts"
-        model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.3)
+        # FIX: Using the model you confirmed works: 'gemini-2.5-flash'
+        # FIX: Keeping transport="rest" to prevent the 'buffering forever' issue
+        model = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash", 
+            temperature=0.3,
+            max_retries=1,
+            transport="rest"
+        )
 
-        # 3. Return the configuration
-        # This is just the LLM + Prompt configuration. 
-        # The actual 'chain' is built dynamically in app.py when we have the vector_store.
         return model, prompt

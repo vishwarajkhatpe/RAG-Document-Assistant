@@ -1,15 +1,11 @@
 streamlit
-google-generativeai
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-core==0.1.52
 langchain-google-genai==1.0.3
 langchain-text-splitters==0.0.1
 faiss-cpu
-pypdf2
+pypdf
 python-dotenv
-streamlit-lottie
-requests
-sentence-transformers  # <--- NEW: Runs embeddings locally
-streamlit-option-menu  # <--- NEW: For the beautiful sidebar
-pypdf  # <--- NEW: PDF handling
+sentence-transformers
+streamlit_option_menu

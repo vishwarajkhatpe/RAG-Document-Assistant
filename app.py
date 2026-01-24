@@ -2,7 +2,7 @@ import streamlit as st
 import time
 from datetime import datetime
 from streamlit_option_menu import option_menu
-from langchain.chains import RetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from src.pdf_handler import PDFHandler
 from src.vector_db import VectorDB
 from src.rag_chain import RAGChain
