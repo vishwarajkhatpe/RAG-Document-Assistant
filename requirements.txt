@@ -1,11 +1,27 @@
-streamlit
+# --- Core Application UI ---
+streamlit                   # The web framework for the frontend
+streamlit-option-menu       # Custom sidebar navigation component
+
+# --- LangChain Ecosystem (Stable v1.0 Lock) ---
+# CRITICAL: Do not upgrade these indiscriminately. 
+# These versions are pinned to maintain compatibility with the v1.0 codebase.
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-core==0.1.52
-langchain-google-genai==1.0.3
 langchain-text-splitters==0.0.1
-faiss-cpu
-pypdf
-python-dotenv
+
+# --- AI Models & Integrations ---
+# Google Gemini API client (Compatible with LangChain 0.1.x)
+langchain-google-genai==1.0.3   
+
+# Local Embeddings (HuggingFace)
+# Required for running 'all-MiniLM-L6-v2' on CPU without API keys
 sentence-transformers
-streamlit_option_menu
+
+# --- Vector Database ---
+# CPU-optimized version for hosting on standard cloud instances
+faiss-cpu
+
+# --- Data Processing Utilities ---
+pypdf                       # Robust PDF parsing library
+python-dotenv               # Loads API keys from .env file securely

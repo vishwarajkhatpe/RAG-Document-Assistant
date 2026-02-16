@@ -1,24 +1,50 @@
+import logging
 import requests
 import streamlit as st
+from typing import Optional, Dict, Any
+
+# Initialize logger for UI events
+logger = logging.getLogger(__name__)
 
 class UIUtils:
+    """
+    Utility class for handling Frontend rendering, CSS injection, and HTML generation.
+    Separates presentation logic from business logic (app.py).
+    """
+
     @staticmethod
-    def load_lottie_url(url: str):
+    def load_lottie_url(url: str) -> Optional[Dict[str, Any]]:
         """
-        Uses the 'requests' library to load Lottie animations.
+        Fetches a Lottie animation JSON from a remote URL.
+        
+        Args:
+            url: The URL of the Lottie JSON.
+            
+        Returns:
+            dict: The JSON data if successful, None otherwise.
         """
         try:
-            r = requests.get(url)
+            # Added timeout to prevent the app from hanging if the Lottie server is slow
+            r = requests.get(url, timeout=5)
+            
             if r.status_code != 200:
+                logger.warning(f"Failed to load Lottie animation: HTTP {r.status_code}")
                 return None
+                
             return r.json()
-        except:
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Network error loading Lottie: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error loading Lottie: {e}")
             return None
 
     @staticmethod
-    def get_clean_style():
+    def get_clean_style() -> str:
         """
-        Defines the Global CSS for the application.
+        Returns the Global CSS for the application.
+        Includes definitions for the Hero Banner, Chat Bubbles, and Sidebar.
         """
         return """
         <style>
@@ -179,9 +205,9 @@ class UIUtils:
         """
 
     @staticmethod
-    def render_home_card(emoji, title, desc):
+    def render_home_card(emoji: str, title: str, desc: str) -> str:
         """
-        Renders the cards used on the Home Screen.
+        Generates the HTML for the feature cards on the Home Screen.
         """
         return f"""
         <div class="feature-card">
@@ -192,9 +218,13 @@ class UIUtils:
         """
 
     @staticmethod
-    def render_message(role, content):
+    def render_message(role: str, content: str) -> str:
         """
-        Renders the Chat Bubbles.
+        Generates the HTML for Chat Bubbles based on the sender role.
+        
+        Args:
+            role (str): 'user' or 'assistant'.
+            content (str): The text message to display.
         """
         if role == "user":
             return f"""
@@ -210,9 +240,9 @@ class UIUtils:
             """
 
     @staticmethod
-    def render_source(page, text):
+    def render_source(page: str, text: str) -> str:
         """
-        Renders the Citation Box for Feature 2.
+        Generates the HTML for the Citation/Source box.
         """
         return f"""
         <div class="source-container">

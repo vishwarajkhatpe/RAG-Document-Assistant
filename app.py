@@ -1,91 +1,65 @@
+import os
+import time
 import streamlit as st
-import gc
-import time  # <--- NEW IMPORT
+from dotenv import load_dotenv
 from streamlit_option_menu import option_menu
 from langchain.chains import RetrievalQA
+
+# Import our refactored production modules
 from src.pdf_handler import PDFHandler
 from src.vector_db import VectorDB
 from src.rag_chain import RAGChain
 from src.ui_utils import UIUtils
-from dotenv import load_dotenv
-import os
+
+# --- CONFIGURATION ---
+st.set_page_config(
+    page_title="RAG Document Assistant", 
+    page_icon="🤖", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Load environment variables
+load_dotenv()
 
 # --- TYPEWRITER EFFECT ENGINE ---
 def stream_parser(text: str):
-    """Simulates typing effect for the AI response"""
+    """
+    Yields text word-by-word to simulate a real-time AI response.
+    """
     for word in text.split(" "):
         yield word + " "
-        time.sleep(0.02)  # Adjust speed here (lower = faster)
+        time.sleep(0.02)
 
-# --- STYLE OVERRIDE (Royal Indigo Theme) ---
-def get_override_style():
-    return """
-    <style>
-        /* Override Hero Banner to Royal Indigo */
-        .hero-banner {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-        }
-        
-        /* Override Buttons */
-        .stButton > button {
-            background: linear-gradient(to right, #4f46e5, #7c3aed) !important;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        .stButton > button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
-        }
+# --- INITIALIZATION ---
+def initialize_session_state():
+    """Initializes all session state variables safely."""
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if "vector_store" not in st.session_state:
+        st.session_state.vector_store = None
 
-        /* Override Citation Borders */
-        .source-container {
-            border-left: 3px solid #4f46e5 !important;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        
-        .user-bubble {
-            background-color: #e0e7ff !important;
-            color: #3730a3 !important;
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        /* Override Workspace Header Underline */
-        div[style*="border-bottom: 3px solid #00b09b"] {
-            border-bottom: 3px solid #4f46e5 !important;
-        }
-    </style>
-    """
+initialize_session_state()
 
-# --- CONFIG ---
-st.set_page_config(page_title="RAG Document Assistant", page_icon="🤖", layout="wide")
-
-# 1. Load the original structure (Layout)
+# --- STYLE INJECTION ---
+# 1. Load the clean Global CSS
 st.markdown(UIUtils.get_clean_style(), unsafe_allow_html=True)
 
-# 2. Inject the new Colors (Theme)
-st.markdown(get_override_style(), unsafe_allow_html=True)
+# 2. Inject the Royal Indigo Theme Overrides
+# We keep this here to allow for easy theme switching in the future
+st.markdown("""
+    <style>
+        /* Royal Indigo Theme Overrides */
+        .hero-banner { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important; }
+        .stButton > button { background: linear-gradient(to right, #4f46e5, #7c3aed) !important; border: none; }
+        .stButton > button:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important; }
+        .source-container { border-left: 3px solid #4f46e5 !important; }
+        .user-bubble { background-color: #e0e7ff !important; color: #3730a3 !important; }
+        div[style*="border-bottom: 3px solid #00b09b"] { border-bottom: 3px solid #4f46e5 !important; }
+    </style>
+""", unsafe_allow_html=True)
 
-# --- CLOUD COMPATIBILITY BRIDGE ---
-load_dotenv()
-if "GOOGLE_API_KEY" in st.secrets:
-    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
-
-# --- VALIDATION ---
-if not os.getenv("GOOGLE_API_KEY"):
-    st.error("🚨 Critical Error: GOOGLE_API_KEY not found. Please configure .env or Streamlit Secrets.")
-    st.stop()
-
-# --- STATE ---
-if "messages" not in st.session_state: st.session_state.messages = []
-if "vector_store" not in st.session_state: st.session_state.vector_store = None
-
-# --- SIDEBAR ---
+# --- SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.markdown("""
         <div class="sidebar-logo-title">
@@ -132,6 +106,7 @@ with st.sidebar:
                     with st.status("🚀 Initializing Engine...", expanded=True) as status:
                         
                         status.write("📂 Extracting Text & Metadata...")
+                        # 1. Use the robust PDF Handler
                         chunked_documents = PDFHandler.get_chunked_documents(pdf_docs)
                         
                         if not chunked_documents:
@@ -140,12 +115,9 @@ with st.sidebar:
 
                         status.write(f"✂️ Optimized {len(chunked_documents)} chunks...")
                         
+                        # 2. Use the Cached Vector DB Creator
                         status.write("🧠 Hydrating Vector Database...")
                         st.session_state.vector_store = VectorDB.create_vector_store(chunked_documents)
-                        
-                        # Memory Optimization
-                        del chunked_documents
-                        gc.collect()
                         
                         status.update(label="System Ready!", state="complete", expanded=False)
                         
@@ -158,8 +130,8 @@ with st.sidebar:
             st.session_state.messages = []
             st.rerun()
 
-    # FOOTER
-    st.markdown(f"""
+    # Footer
+    st.markdown("""
         <div class="sidebar-footer" style="position: fixed; bottom: 0; padding: 20px; color: #64748b; font-size: 0.8rem;">
             <span>v1.0<br>Developed by <b>Vishwaraj Khatpe</b></span>
         </div>
@@ -183,7 +155,7 @@ if selected == "Home":
 elif selected == "Workspace":
     st.markdown("""
         <div style="font-size: 2.2rem; font-weight: 700; color: #1e293b; margin-bottom: 25px; 
-        padding-bottom: 10px; border-bottom: 3px solid #00b09b; display: inline-block;">
+        padding-bottom: 10px; border-bottom: 3px solid #4f46e5; display: inline-block;">
             Document Intelligence Hub
         </div>
     """, unsafe_allow_html=True)
@@ -192,7 +164,6 @@ elif selected == "Workspace":
     chat_container = st.container()
     with chat_container:
         for message in st.session_state.messages:
-            # We don't stream history, just render it instantly
             st.markdown(UIUtils.render_message(message["role"], message["content"]), unsafe_allow_html=True)
             
             if "sources" in message:
@@ -207,15 +178,16 @@ elif selected == "Workspace":
         # Render User Message Immediately
         st.markdown(UIUtils.render_message("user", prompt), unsafe_allow_html=True)
 
+        # Validation: Ensure we have a vector store before asking the LLM
         if not st.session_state.vector_store:
             st.warning("⚠️ Knowledge Base Empty. Please upload and process a document first.")
         else:
-            # Interactive "Thinking" Spinner
             with st.spinner("🧠 Analyzing context vectors..."):
                 try:
-                    # Initialize Chain
+                    # 1. Initialize Chain (Securely gets API key)
                     model, prompt_template = RAGChain.get_conversational_chain()
                     
+                    # 2. Configure Retrieval
                     qa_chain = RetrievalQA.from_chain_type(
                         llm=model,
                         chain_type="stuff",
@@ -224,33 +196,32 @@ elif selected == "Workspace":
                         chain_type_kwargs={"prompt": prompt_template}
                     )
                     
-                    # Execute
+                    # 3. Execute
                     response = qa_chain.invoke({"query": prompt})
                     answer = response["result"]
                     source_docs = response["source_documents"]
                     
-                    # Formatter
+                    # 4. Format Sources
                     formatted_sources = []
                     for doc in source_docs:
                         page = doc.metadata.get("page", "Unknown")
                         source_file = doc.metadata.get("source", "Doc")
+                        # Clean text for display
                         text = doc.page_content[:150].replace("\n", " ") + "..."
                         formatted_sources.append({"page": f"{page} ({source_file})", "text": text})
                     
-                    # --- INTERACTIVE RESPONSE ---
-                    # 1. Save to history FIRST
+                    # 5. Update State
                     st.session_state.messages.append({
                         "role": "assistant", 
                         "content": answer,
                         "sources": formatted_sources
                     })
                     
-                    # 2. Stream the output with Typewriter Effect
-                    # We create a placeholder for the "Assistant" message
+                    # 6. Stream Output
                     with st.chat_message("assistant", avatar="🤖"):
                         st.write_stream(stream_parser(answer))
                     
-                    # 3. Show Citations AFTER streaming finishes
+                    # 7. Show Citations
                     with st.expander("🔍 View Verified Citations", expanded=True):
                         for src in formatted_sources:
                             st.markdown(UIUtils.render_source(src['page'], src['text']), unsafe_allow_html=True)
