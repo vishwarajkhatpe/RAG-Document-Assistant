@@ -17,3 +17,5 @@ env/
 # HIDDEN FOLDERS
 tests/
 faiss_index/
+.streamlit/
+.streamlit/secrets.toml
