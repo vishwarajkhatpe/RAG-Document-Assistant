@@ -25,16 +25,32 @@ class UIUtils:
             /* --- FONTS & GLOBAL --- */
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
             
+            :root {
+                --glass-bg: rgba(255, 255, 255, 0.4);
+                --glass-border: rgba(255, 255, 255, 0.5);
+                --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+                --glass-blur: blur(12px);
+                --indigo-light: rgba(79, 70, 229, 0.1);
+                --indigo-solid: #4f46e5;
+            }
+
             html, body, [class*="css"] {
                 font-family: 'Inter', sans-serif;
-                background-color: #f8fafc; /* Slate-50 */
-                color: #0f172a; /* Slate-900 */
+                color: #0f172a;
+            }
+            
+            /* Ambient Background */
+            .stApp {
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                background-attachment: fixed;
             }
 
             /* --- SIDEBAR --- */
             [data-testid="stSidebar"] {
-                background-color: #ffffff;
-                border-right: 1px solid #e2e8f0;
+                background-color: rgba(255, 255, 255, 0.3) !important;
+                backdrop-filter: var(--glass-blur) !important;
+                -webkit-backdrop-filter: var(--glass-blur) !important;
+                border-right: 1px solid var(--glass-border) !important;
             }
             .sidebar-logo-title {
                 display: flex;
@@ -51,51 +67,59 @@ class UIUtils:
 
             /* --- HERO BANNER --- */
             .hero-banner {
-                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                color: white;
+                background: var(--glass-bg);
+                backdrop-filter: var(--glass-blur);
+                -webkit-backdrop-filter: var(--glass-blur);
                 padding: 4rem 2rem;
                 border-radius: 16px;
                 text-align: center;
                 margin-bottom: 3rem;
-                box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+                border: 1px solid var(--glass-border);
+                box-shadow: var(--glass-shadow);
             }
             .hero-title {
                 font-size: 3rem;
                 font-weight: 800;
                 margin-bottom: 1rem;
                 letter-spacing: -0.05rem;
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
             .hero-subtitle {
                 font-size: 1.25rem;
                 font-weight: 500;
-                opacity: 0.95;
+                color: #475569;
             }
 
             /* --- FEATURE CARDS --- */
             .feature-card {
-                background: white;
-                border-radius: 12px;
+                background: var(--glass-bg);
+                backdrop-filter: var(--glass-blur);
+                -webkit-backdrop-filter: var(--glass-blur);
+                border-radius: 16px;
                 padding: 1.5rem;
                 height: 100%;
-                border: 1px solid #e2e8f0;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                border: 1px solid var(--glass-border);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--glass-shadow);
             }
             .feature-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-                border-color: #4f46e5;
+                box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+                border-color: rgba(255, 255, 255, 0.8);
             }
             .card-icon {
                 font-size: 2rem;
                 margin-bottom: 1rem;
-                background: #f0fdf4;
+                background: rgba(255, 255, 255, 0.5);
                 width: 50px;
                 height: 50px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: 50%;
+                box-shadow: inset 0 2px 4px rgba(255,255,255,0.8);
             }
             .card-title {
                 font-weight: 700;
@@ -104,7 +128,7 @@ class UIUtils:
                 color: #1e293b;
             }
             .card-desc {
-                color: #64748b;
+                color: #475569;
                 font-size: 0.95rem;
                 line-height: 1.5;
             }
@@ -121,44 +145,49 @@ class UIUtils:
                 line-height: 1.6;
                 font-size: 1rem;
                 position: relative;
-                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+                backdrop-filter: var(--glass-blur);
+                -webkit-backdrop-filter: var(--glass-blur);
+                box-shadow: var(--glass-shadow);
             }
             
             /* Animations */
-            @keyframes fadeIn {
-                0% { opacity: 0; transform: translateY(10px); }
+            @keyframes slideUp {
+                0% { opacity: 0; transform: translateY(15px); }
                 100% { opacity: 1; transform: translateY(0); }
             }
 
             /* User Bubble (Indigo Theme) */
             .user-bubble {
-                background-color: #e0e7ff; /* Indigo-100 */
-                color: #3730a3; /* Indigo-800 */
+                background: var(--indigo-light);
+                border: 1px solid rgba(79, 70, 229, 0.2);
+                color: #3730a3;
                 border-top-right-radius: 0.25rem;
-                animation: fadeIn 0.3s ease-in;
+                animation: slideUp 0.4s ease-out forwards;
             }
             
             /* AI Bubble (White) */
             .ai-bubble {
-                background-color: #ffffff;
-                border: 1px solid #e2e8f0;
+                background: rgba(255, 255, 255, 0.6);
+                border: 1px solid var(--glass-border);
                 color: #334155;
                 border-top-left-radius: 0.25rem;
+                animation: slideUp 0.4s ease-out forwards;
             }
 
             /* --- CITATIONS --- */
             .source-container {
                 margin-top: 0.75rem;
-                background-color: #f8fafc;
-                border-left: 3px solid #4f46e5;
-                padding: 0.75rem;
+                background: rgba(255, 255, 255, 0.5);
+                backdrop-filter: blur(4px);
+                border-left: 3px solid var(--indigo-solid);
                 border-radius: 0.25rem;
-                animation: fadeIn 0.5s ease-in;
+                padding: 0.75rem;
+                animation: slideUp 0.5s ease-out forwards;
             }
             .source-header {
                 font-size: 0.75rem;
                 font-weight: 600;
-                color: #4f46e5;
+                color: var(--indigo-solid);
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
                 margin-bottom: 0.25rem;
@@ -171,17 +200,30 @@ class UIUtils:
 
             /* --- BUTTONS --- */
             .stButton > button {
-                background: linear-gradient(to right, #4f46e5, #7c3aed);
-                color: white;
-                border: none;
-                font-weight: 600;
-                padding: 0.5rem 1rem;
-                border-radius: 0.5rem;
-                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.4) !important;
+                backdrop-filter: var(--glass-blur) !important;
+                -webkit-backdrop-filter: var(--glass-blur) !important;
+                color: var(--indigo-solid) !important;
+                border: 1px solid rgba(79, 70, 229, 0.3) !important;
+                font-weight: 600 !important;
+                padding: 0.5rem 1rem !important;
+                border-radius: 0.75rem !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
             }
             .stButton > button:hover {
-                transform: scale(1.02);
-                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+                transform: translateY(-2px) !important;
+                background: rgba(255, 255, 255, 0.8) !important;
+                box-shadow: 0 8px 25px rgba(79, 70, 229, 0.2) !important;
+                border-color: var(--indigo-solid) !important;
+            }
+            
+            /* --- INPUT FIELDS --- */
+            .stChatInput > div {
+                background: rgba(255, 255, 255, 0.5) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 1px solid var(--glass-border) !important;
+                border-radius: 1rem !important;
             }
         </style>
         """

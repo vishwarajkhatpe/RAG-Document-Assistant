@@ -124,7 +124,7 @@ with st.sidebar:
     # FOOTER
     st.markdown(f"""
         <div class="sidebar-footer" style="position: fixed; bottom: 0; padding: 20px; color: #64748b; font-size: 0.8rem;">
-            <span>v1.0<br>Developed by <b>Vishwaraj Khatpe</b></span>
+            <span>v2.0<br>Developed by <b>Vishwaraj Khatpe</b></span>
         </div>
     """, unsafe_allow_html=True)
 
