@@ -38,9 +38,12 @@ if not os.getenv("GOOGLE_API_KEY"):
 
 # --- STATE ---
 if "messages" not in st.session_state: st.session_state.messages = []
-if "vector_store" not in st.session_state: st.session_state.vector_store = None
 if "model" not in st.session_state:
     st.session_state.model, st.session_state.prompt_template = RAGChain.get_conversational_chain()
+
+if "vector_store" not in st.session_state: 
+    # Try to load from disk first
+    st.session_state.vector_store = VectorDB.load_vector_store()
 
 # --- SIDEBAR ---
 with st.sidebar:
@@ -99,6 +102,9 @@ with st.sidebar:
                         
                         status.write("🧠 Hydrating Vector Database...")
                         st.session_state.vector_store = VectorDB.create_vector_store(chunked_documents)
+                        
+                        status.write("💾 Persisting Knowledge Base...")
+                        VectorDB.save_vector_store(st.session_state.vector_store)
                         
                         # Memory Optimization
                         del chunked_documents
