@@ -1,8 +1,8 @@
 import logging
 import streamlit as st
-from typing import List, Any
+import os
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 
 # Initialize module-specific logger
@@ -13,64 +13,54 @@ class VectorDB:
     Manages the Vector Database (FAISS) and Embedding Models.
     
     Architecture:
-    - Uses Local Embeddings (HuggingFace) to avoid API costs and rate limits.
-    - Uses FAISS (Facebook AI Similarity Search) for high-performance dense retrieval.
-    - Implements strict caching to prevent re-loading heavy models on every user interaction.
+    - Uses Google Gemini Embeddings (Cloud) for maximum speed and accuracy.
+    - Uses FAISS for high-performance retrieval.
     """
     
-    # Configuration
-    # 'all-MiniLM-L6-v2' is the industry standard for lightweight, fast, local embeddings.
-    # It maps sentences to a 384-dimensional dense vector space.
-    MODEL_NAME = "all-MiniLM-L6-v2"
+    # CRITICAL: This is the new, high-performance model.
+    # The old 'embedding-001' is dead. This is the replacement.
+    MODEL_NAME = "models/text-embedding-004"
 
     @staticmethod
     @st.cache_resource(show_spinner=False)
-    def get_embedding_model() -> HuggingFaceEmbeddings:
+    def get_embedding_model():
         """
-        Loads the HuggingFace embedding model.
-        Cached by Streamlit to ensure it only loads ONCE per session.
-        
-        Returns:
-            HuggingFaceEmbeddings: The loaded model instance.
+        Loads the Google GenAI embedding model.
         """
         try:
-            logger.info(f"Loading embedding model: {VectorDB.MODEL_NAME}...")
+            api_key = os.getenv("GOOGLE_API_KEY")
+            if not api_key:
+                raise ValueError("GOOGLE_API_KEY missing.")
+
+            logger.info(f"Connecting to Google Cloud Embeddings: {VectorDB.MODEL_NAME}...")
             
-            # We use the CPU version for compatibility with free-tier cloud instances
-            embeddings = HuggingFaceEmbeddings(
-                model_name=VectorDB.MODEL_NAME,
-                model_kwargs={'device': 'cpu'}
+            # We configure it to use the new model
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model=VectorDB.MODEL_NAME,
+                google_api_key=api_key
             )
             
-            logger.info("Embedding model loaded successfully.")
+            logger.info("Cloud Embedding model connected.")
             return embeddings
             
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
-            raise RuntimeError(f"Embedding Model Error: {e}")
+            raise RuntimeError(f"Embedding Connection Error: {e}")
 
     @staticmethod
-    def create_vector_store(documents: List[Document]) -> FAISS:
+    def create_vector_store(documents: list[Document]):
         """
-        Hydrates a FAISS vector index from a list of Document objects.
-        
-        Args:
-            documents: List of Document objects (must contain 'page_content' and 'metadata').
-
-        Returns:
-            FAISS: An in-memory vector store ready for retrieval.
+        Hydrates a FAISS vector index using Cloud Embeddings.
         """
         try:
             if not documents:
-                logger.warning("Attempted to create vector store with empty document list.")
-                raise ValueError("No documents provided for indexing.")
+                raise ValueError("No documents provided.")
 
-            logger.info(f"Creating FAISS index for {len(documents)} document chunks...")
+            logger.info(f"Sending {len(documents)} chunks to Google Cloud for embedding...")
             
             embeddings = VectorDB.get_embedding_model()
             
-            # This step converts text -> vectors and builds the index
-            # It preserves the metadata (page numbers) we extracted earlier
+            # This sends text to Google and gets vectors back instantly
             vector_store = FAISS.from_documents(
                 documents=documents, 
                 embedding=embeddings
