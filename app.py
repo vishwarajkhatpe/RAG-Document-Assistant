@@ -1,8 +1,8 @@
 import streamlit as st
 import gc
-import time  # <--- NEW IMPORT
 from streamlit_option_menu import option_menu
 from langchain.chains import RetrievalQA
+from langchain_core.callbacks.base import BaseCallbackHandler
 from src.pdf_handler import PDFHandler
 from src.vector_db import VectorDB
 from src.rag_chain import RAGChain
@@ -10,12 +10,15 @@ from src.ui_utils import UIUtils
 from dotenv import load_dotenv
 import os
 
-# --- TYPEWRITER EFFECT ENGINE ---
-def stream_parser(text: str):
-    """Simulates typing effect for the AI response"""
-    for word in text.split(" "):
-        yield word + " "
-        time.sleep(0.02)  # Adjust speed here (lower = faster)
+# --- STREAMING HANDLER ---
+class StreamHandler(BaseCallbackHandler):
+    def __init__(self, container, initial_text=""):
+        self.container = container
+        self.text = initial_text
+
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
+        self.text += token
+        self.container.markdown(self.text + "▌")
 
 # --- CONFIG ---
 st.set_page_config(page_title="RAG Document Assistant", page_icon="🤖", layout="wide")
@@ -175,10 +178,17 @@ elif selected == "Workspace":
                         chain_type_kwargs={"prompt": st.session_state.prompt_template}
                     )
                     
-                    # Execute
-                    response = qa_chain.invoke({"query": prompt})
-                    answer = response["result"]
-                    source_docs = response["source_documents"]
+                    # Execute with streaming
+                    with st.chat_message("assistant", avatar="🤖"):
+                        stream_placeholder = st.empty()
+                        stream_handler = StreamHandler(stream_placeholder)
+                        response = qa_chain.invoke({"query": prompt}, config={"callbacks": [stream_handler]})
+                        
+                        answer = response["result"]
+                        source_docs = response["source_documents"]
+                        
+                        # Remove cursor at the end
+                        stream_placeholder.markdown(answer)
                     
                     # Formatter
                     formatted_sources = []
@@ -196,12 +206,7 @@ elif selected == "Workspace":
                         "sources": formatted_sources
                     })
                     
-                    # 2. Stream the output with Typewriter Effect
-                    # We create a placeholder for the "Assistant" message
-                    with st.chat_message("assistant", avatar="🤖"):
-                        st.write_stream(stream_parser(answer))
-                    
-                    # 3. Show Citations AFTER streaming finishes
+                    # 2. Show Citations AFTER streaming finishes
                     with st.expander("🔍 View Verified Citations", expanded=True):
                         for src in formatted_sources:
                             st.markdown(UIUtils.render_source(src['page'], src['text']), unsafe_allow_html=True)

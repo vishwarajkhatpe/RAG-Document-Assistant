@@ -41,7 +41,8 @@ class RAGChain:
             model="gemini-2.5-flash", 
             temperature=0.1,
             max_retries=2,
-            transport="rest"
+            transport="rest",
+            streaming=True
         )
 
         return model, prompt
