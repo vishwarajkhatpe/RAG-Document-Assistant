@@ -17,59 +17,11 @@ def stream_parser(text: str):
         yield word + " "
         time.sleep(0.02)  # Adjust speed here (lower = faster)
 
-# --- STYLE OVERRIDE (Royal Indigo Theme) ---
-def get_override_style():
-    return """
-    <style>
-        /* Override Hero Banner to Royal Indigo */
-        .hero-banner {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-        }
-        
-        /* Override Buttons */
-        .stButton > button {
-            background: linear-gradient(to right, #4f46e5, #7c3aed) !important;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        .stButton > button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
-        }
-
-        /* Override Citation Borders */
-        .source-container {
-            border-left: 3px solid #4f46e5 !important;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        
-        .user-bubble {
-            background-color: #e0e7ff !important;
-            color: #3730a3 !important;
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        /* Override Workspace Header Underline */
-        div[style*="border-bottom: 3px solid #00b09b"] {
-            border-bottom: 3px solid #4f46e5 !important;
-        }
-    </style>
-    """
-
 # --- CONFIG ---
 st.set_page_config(page_title="RAG Document Assistant", page_icon="🤖", layout="wide")
 
 # 1. Load the original structure (Layout)
 st.markdown(UIUtils.get_clean_style(), unsafe_allow_html=True)
-
-# 2. Inject the new Colors (Theme)
-st.markdown(get_override_style(), unsafe_allow_html=True)
 
 # --- CLOUD COMPATIBILITY BRIDGE ---
 load_dotenv()
@@ -183,7 +135,7 @@ if selected == "Home":
 elif selected == "Workspace":
     st.markdown("""
         <div style="font-size: 2.2rem; font-weight: 700; color: #1e293b; margin-bottom: 25px; 
-        padding-bottom: 10px; border-bottom: 3px solid #00b09b; display: inline-block;">
+        padding-bottom: 10px; border-bottom: 3px solid #4f46e5; display: inline-block;">
             Document Intelligence Hub
         </div>
     """, unsafe_allow_html=True)

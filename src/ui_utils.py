@@ -51,13 +51,13 @@ class UIUtils:
 
             /* --- HERO BANNER --- */
             .hero-banner {
-                background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
                 color: white;
                 padding: 4rem 2rem;
                 border-radius: 16px;
                 text-align: center;
                 margin-bottom: 3rem;
-                box-shadow: 0 10px 25px -5px rgba(0, 176, 155, 0.4);
+                box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
             }
             .hero-title {
                 font-size: 3rem;
@@ -84,7 +84,7 @@ class UIUtils:
             .feature-card:hover {
                 transform: translateY(-5px);
                 box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-                border-color: #00b09b;
+                border-color: #4f46e5;
             }
             .card-icon {
                 font-size: 2rem;
@@ -124,11 +124,18 @@ class UIUtils:
                 box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             }
             
-            /* User Bubble (Green Theme) */
+            /* Animations */
+            @keyframes fadeIn {
+                0% { opacity: 0; transform: translateY(10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+
+            /* User Bubble (Indigo Theme) */
             .user-bubble {
-                background-color: #dcfce7; /* Green-100 */
-                color: #166534; /* Green-800 */
+                background-color: #e0e7ff; /* Indigo-100 */
+                color: #3730a3; /* Indigo-800 */
                 border-top-right-radius: 0.25rem;
+                animation: fadeIn 0.3s ease-in;
             }
             
             /* AI Bubble (White) */
@@ -143,14 +150,15 @@ class UIUtils:
             .source-container {
                 margin-top: 0.75rem;
                 background-color: #f8fafc;
-                border-left: 3px solid #00b09b;
+                border-left: 3px solid #4f46e5;
                 padding: 0.75rem;
                 border-radius: 0.25rem;
+                animation: fadeIn 0.5s ease-in;
             }
             .source-header {
                 font-size: 0.75rem;
                 font-weight: 600;
-                color: #00b09b;
+                color: #4f46e5;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
                 margin-bottom: 0.25rem;
@@ -163,17 +171,17 @@ class UIUtils:
 
             /* --- BUTTONS --- */
             .stButton > button {
-                background: linear-gradient(to right, #00b09b, #96c93d);
+                background: linear-gradient(to right, #4f46e5, #7c3aed);
                 color: white;
                 border: none;
                 font-weight: 600;
                 padding: 0.5rem 1rem;
                 border-radius: 0.5rem;
-                transition: opacity 0.2s;
+                transition: all 0.3s ease;
             }
             .stButton > button:hover {
-                opacity: 0.9;
-                box-shadow: 0 4px 6px -1px rgba(0, 176, 155, 0.4);
+                transform: scale(1.02);
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
             }
         </style>
         """
