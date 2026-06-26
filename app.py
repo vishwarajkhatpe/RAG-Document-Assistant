@@ -36,6 +36,8 @@ if not os.getenv("GOOGLE_API_KEY"):
 # --- STATE ---
 if "messages" not in st.session_state: st.session_state.messages = []
 if "vector_store" not in st.session_state: st.session_state.vector_store = None
+if "model" not in st.session_state:
+    st.session_state.model, st.session_state.prompt_template = RAGChain.get_conversational_chain()
 
 # --- SIDEBAR ---
 with st.sidebar:
@@ -165,15 +167,12 @@ elif selected == "Workspace":
             # Interactive "Thinking" Spinner
             with st.spinner("🧠 Analyzing context vectors..."):
                 try:
-                    # Initialize Chain
-                    model, prompt_template = RAGChain.get_conversational_chain()
-                    
                     qa_chain = RetrievalQA.from_chain_type(
-                        llm=model,
+                        llm=st.session_state.model,
                         chain_type="stuff",
                         retriever=st.session_state.vector_store.as_retriever(search_kwargs={"k": 3}),
                         return_source_documents=True,
-                        chain_type_kwargs={"prompt": prompt_template}
+                        chain_type_kwargs={"prompt": st.session_state.prompt_template}
                     )
                     
                     # Execute
